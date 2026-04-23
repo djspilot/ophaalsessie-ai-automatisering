@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ophaalsessie AI-automatisering</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #f8f8f9;
+  --surface: #ffffff;
+  --border: #dddde0;
+  --text: #1a1a1a;
+  --muted: #6b6b73;
+  --accent: #2f5fd4;
+  --accent-light: #e8edf8;
+  --green: #1a8a5a;
+  --green-light: #e6f5ee;
+  --orange: #c27a09;
+  --orange-light: #fdf6e8;
+  --red: #c53030;
+  --red-light: #fde8e8;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.container { max-width:900px; margin:0 auto; padding:28px 20px; }
+
+/* Header */
+header {
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+header p {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* Stats */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 640px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } }
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: center;
+}
+
+.stat-number { font-size: 1.6rem; font-weight: 700; }
+.stat-number.total { color: var(--accent); }
+.stat-number.high { color: var(--red); }
+.stat-number.medium { color: var(--orange); }
+.stat-number.savings { color: var(--green); }
+
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Card */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+}
+
+.card h2 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Form */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 580px) { .form-grid { grid-template-columns: 1fr; } }
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+
+label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+input, textarea {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+input::placeholder, textarea::placeholder { color: #b0b0b5; }
+textarea { resize: vertical; min-height: 52px; }
+
+/* Tags */
+.tag-group { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.tag {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s;
+  background: var(--surface);
+  color: var(--muted);
+  user-select: none;
+}
+
+.tag:hover { border-color: var(--accent); color: var(--text); }
+
+.tag.selected {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+/* Buttons */
+.btn {
+  padding: 9px 18px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #2550b8; }
+.btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+
+.btn-outline {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.btn-outline:hover { color: var(--text); border-color: #bbb; }
+
+.btn-green { background: var(--green); color: white; }
+.btn-green:hover { background: #157248; }
+
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.btn-link:hover { color: var(--red); }
+
+.form-actions { margin-top: 18px; display: flex; gap: 8px; align-items: center; }
+
+.kbd-hint { font-size: 0.72rem; color: #b0b0b5; }
+.kbd {
+  padding: 1px 5px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.7rem;
+  background: #f0f0f2;
+}
+
+/* Overview */
+.overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.overview-header h2 { font-size: 0.95rem; font-weight: 700; }
+
+.overview-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+.filter-select {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.82rem;
+  background: var(--surface);
+  color: var(--text);
+  font-family: inherit;
+}
+
+.filter-select:focus { outline: none; border-color: var(--accent); }
+
+/* Idea list */
+.idea-list { display: flex; flex-direction: column; gap: 8px; }
+
+.idea-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  position: relative;
+  transition: box-shadow 0.12s;
+  animation: cardIn 0.2s ease;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.idea-card:hover { box-shadow: 0 1px 6px rgba(0,0,0,0.04); }
+
+.idea-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 10px; bottom: 10px;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+}
+
+.idea-card.p-hoog::before { background: var(--red); }
+.idea-card.p-midden::before { background: var(--orange); }
+.idea-card.p-laag::before { background: var(--green); }
+
+.idea-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.idea-title { font-weight: 600; font-size: 0.94rem; }
+
+.badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge-hoog { background: var(--red-light); color: var(--red); }
+.badge-midden { background: var(--orange-light); color: var(--orange); }
+.badge-laag { background: var(--green-light); color: var(--green); }
+
+.idea-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 14px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.idea-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+
+.idea-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.idea-notes {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.idea-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.idea-footer-left {
+  font-size: 0.73rem;
+  color: #b0b0b5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.score-bar { display: inline-flex; align-items: center; gap: 4px; }
+.score-track {
+  width: 40px; height: 3px;
+  background: #eee; border-radius: 2px; overflow: hidden;
+}
+.score-fill { height: 100%; border-radius: 2px; }
+
+.empty-state { text-align: center; padding: 48px 20px; color: var(--muted); }
+.empty-state p { margin-bottom: 4px; }
+.empty-state small { color: #b0b0b5; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transform: translateY(70px);
+  opacity: 0;
+  transition: all 0.25s ease;
+  z-index: 1000;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.toast.success { background: var(--green); color: white; }
+.toast.error { background: var(--red); color: white; }
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 900;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+}
+
+.modal h3 { margin-bottom: 12px; font-size: 1rem; }
+
+.modal pre {
+  background: #1e1e2e;
+  color: #cdd6f4;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.modal-actions { margin-top: 14px; display: flex; gap: 8px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>Ophaalsessie AI-automatisering</h1>
+    <p>Beschrijf welke processen in je werk veel tijd kosten. Zo brengen we kansen voor AI-ondersteuning in kaart.</p>
+  </header>
+
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-number total" id="statTotal">-</div>
+      <div class="stat-label">Ingediend</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number high" id="statHigh">-</div>
+      <div class="stat-label">Hoge prioriteit</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number medium" id="statMedium">-</div>
+      <div class="stat-label">Middelhoge prioriteit</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number savings" id="statSavings">-</div>
+      <div class="stat-label">Besparing per week</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Nieuw idee indienen</h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="team">Afdeling / team</label>
+        <input type="text" id="team" placeholder="bijv. HR, Finance, IT" list="team-list" required>
+        <datalist id="team-list"></datalist>
+      </div>
+      <div class="form-group">
+        <label for="naam">Naam</label>
+        <input type="text" id="naam" placeholder="Je naam (optioneel)">
+      </div>
+      <div class="form-group full">
+        <label for="proces">Welk proces kost veel tijd?</label>
+        <input type="text" id="proces" placeholder="bijv. Handmatig facturen controleren en goedkeuren">
+      </div>
+
+      <div class="form-group">
+        <label>Hoe vaak komt dit voor?</label>
+        <div class="tag-group" id="freq-tags">
+          <span class="tag" data-value="Dagelijks">Dagelijks</span>
+          <span class="tag" data-value="Wekelijks">Wekelijks</span>
+          <span class="tag" data-value="Maandelijks">Maandelijks</span>
+          <span class="tag" data-value="Per kwartaal">Per kwartaal</span>
+          <span class="tag" data-value="Ad hoc">Ad hoc</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Wat voor werk is het?</label>
+        <div class="tag-group" id="aard-tags">
+          <span class="tag" data-value="Copy-paste">Copy-paste</span>
+          <span class="tag" data-value="Data-invoer">Data-invoer</span>
+          <span class="tag" data-value="E-mails">E-mails</span>
+          <span class="tag" data-value="Rapportages">Rapportages</span>
+          <span class="tag" data-value="Goedkeuringen">Goedkeuringen</span>
+          <span class="tag" data-value="Zoeken/vergelijken">Zoeken / vergelijken</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Geschatte tijdsbesparing per keer</label>
+        <div class="tag-group" id="tijd-tags">
+          <span class="tag" data-value="15">15 min</span>
+          <span class="tag" data-value="30">30 min</span>
+          <span class="tag" data-value="60">1 uur</span>
+          <span class="tag" data-value="120">2 uur</span>
+          <span class="tag" data-value="240">4 uur of meer</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Hoe voorspelbaar is het proces?</label>
+        <div class="tag-group" id="repetitief-tags">
+          <span class="tag" data-value="1">Altijd hetzelfde</span>
+          <span class="tag" data-value="2">Meestal vergelijkbaar</span>
+          <span class="tag" data-value="3">Elke keer anders</span>
+        </div>
+      </div>
+
+      <div class="form-group full">
+        <label for="context">Toelichting <span style="font-weight:400">(optioneel)</span></label>
+        <textarea id="context" placeholder="Welke tools gebruik je? Wat gaat er vaak mis? Extra informatie die nuttig kan zijn..."></textarea>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" id="submitBtn" onclick="submitIdee()">Indienen</button>
+      <button class="btn btn-outline" onclick="resetForm()">Wissen</button>
+      <span class="kbd-hint"><kbd class="kbd">Ctrl</kbd>+<kbd class="kbd">Enter</kbd></span>
+    </div>
+  </div>
+
+  <div class="overview-header">
+    <h2>Overzicht ingediende ideeen</h2>
+    <div class="overview-actions">
+      <select class="filter-select" id="filterTeam" onchange="loadIdeas()">
+        <option value="">Alle teams</option>
+      </select>
+      <select class="filter-select" id="filterPriority" onchange="loadIdeas()">
+        <option value="">Alle prioriteiten</option>
+        <option value="hoog">Hoge prioriteit</option>
+        <option value="midden">Middelhoge prioriteit</option>
+        <option value="laag">Lage prioriteit</option>
+      </select>
+      <button class="btn btn-outline" onclick="downloadCSV()">Download CSV</button>
+      <button class="btn btn-green" onclick="exportClaude()">Exporteer overzicht</button>
+    </div>
+  </div>
+
+  <div class="idea-list" id="ideaList">
+    <div style="text-align:center;padding:32px;color:var(--muted);">Gegevens ophalen...</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <h3>Exporteer overzicht</h3>
+    <p style="margin-bottom:10px;color:var(--muted);font-size:0.85rem;">Kopieer de tekst hieronder en plak deze in Claude voor een samenvatting en prioritering.</p>
+    <pre id="exportContent"></pre>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="copyExport()">Kopieer naar klembord</button>
+      <button class="btn btn-outline" onclick="closeModal()">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/ophaal-api/api';
+let ideas = [];
+let selectedTags = { freq: null, aard: [], tijd: null, repetitief: null };
+let submitting = false;
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !submitting) { e.preventDefault(); submitIdee(); }
+});
+
+function setupTags(id, key, multi) {
+  document.querySelectorAll(`#${id} .tag`).forEach(tag => {
+    tag.addEventListener('click', () => {
+      if (multi) {
+        tag.classList.toggle('selected');
+        const v = tag.dataset.value;
+        selectedTags[key] = selectedTags[key].includes(v) ? selectedTags[key].filter(x => x !== v) : [...selectedTags[key], v];
+      } else {
+        document.querySelectorAll(`#${id} .tag`).forEach(t => t.classList.remove('selected'));
+        tag.classList.add('selected');
+        selectedTags[key] = tag.dataset.value;
+      }
+    });
+  });
+}
+
+setupTags('freq-tags', 'freq', false);
+setupTags('aard-tags', 'aard', true);
+setupTags('tijd-tags', 'tijd', false);
+setupTags('repetitief-tags', 'repetitief', false);
+
+function getPriority(s) { return s >= 8 ? 'hoog' : s >= 4 ? 'midden' : 'laag'; }
+function prioLabel(p) { return { hoog: 'Hoge prioriteit', midden: 'Middelhoge prioriteit', laag: 'Lage prioriteit' }[p]; }
+function calcScore(f, t, r) {
+  const fs = { 'Dagelijks':5,'Wekelijks':4,'Maandelijks':3,'Per kwartaal':2,'Ad hoc':1 };
+  const rs = { '1':3,'2':2,'3':1 };
+  return (fs[f]||1) + (rs[r]||1) + (t>=120?3:t>=60?2:1);
+}
+function scoreColor(s) { return s>=8?'var(--red)':s>=4?'var(--orange)':'var(--green)'; }
+
+async function api(method, path, body) {
+  const opts = { method, headers: {} };
+  if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  const res = await fetch(API + path, opts);
+  if (!res.ok) throw new Error(res.statusText);
+  return method === 'DELETE' ? null : res.json();
+}
+
+async function submitIdee() {
+  if (submitting) return;
+  const team = document.getElementById('team').value.trim();
+  const naam = document.getElementById('naam').value.trim();
+  const proces = document.getElementById('proces').value.trim();
+  const context = document.getElementById('context').value.trim();
+
+  if (!team || !proces) { showToast('Vul minimaal je afdeling en proces in.', true); return; }
+  if (!selectedTags.freq) { showToast('Geef aan hoe vaak dit voorkomt.', true); return; }
+  if (!selectedTags.tijd) { showToast('Geef een indicatie van de tijdsbesparing.', true); return; }
+  if (!selectedTags.repetitief) { showToast('Geef aan hoe voorspelbaar het proces is.', true); return; }
+
+  const tijdMin = parseInt(selectedTags.tijd);
+  const score = calcScore(selectedTags.freq, tijdMin, selectedTags.repetitief);
+
+  submitting = true;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Bezig...';
+
+  try {
+    await api('POST', '/ideeen', {
+      team, naam: naam || 'Anoniem', proces,
+      freq: selectedTags.freq, aard: [...selectedTags.aard],
+      tijdMin, repetitief: selectedTags.repetitief,
+      score, priority: getPriority(score), context
+    });
+    resetForm();
+    await loadIdeas();
+    showToast('Idee ontvangen.');
+  } catch (e) {
+    showToast('Er ging iets mis. Probeer het opnieuw.', true);
+  } finally {
+    submitting = false;
+    btn.disabled = false; btn.textContent = 'Indienen';
+  }
+}
+
+function resetForm() {
+  ['team','naam','proces','context'].forEach(id => document.getElementById(id).value = '');
+  selectedTags = { freq: null, aard: [], tijd: null, repetitief: null };
+  document.querySelectorAll('.tag.selected').forEach(t => t.classList.remove('selected'));
+  document.getElementById('team').focus();
+}
+
+async function loadIdeas() {
+  const team = document.getElementById('filterTeam').value;
+  const prio = document.getElementById('filterPriority').value;
+  let p = '?';
+  if (team) p += 'team=' + encodeURIComponent(team) + '&';
+  if (prio) p += 'priority=' + prio + '&';
+  try { ideas = await api('GET', '/ideeen' + p); }
+  catch { ideas = []; }
+  updateTeamFilter();
+  renderIdeas();
+  updateStats();
+}
+
+async function deleteIdee(id) {
+  if (!confirm('Weet je zeker dat je dit idee wilt verwijderen?')) return;
+  await api('DELETE', '/ideeen/' + id);
+  await loadIdeas();
+  showToast('Verwijderd.');
+}
+
+function renderIdeas() {
+  const el = document.getElementById('ideaList');
+  if (!ideas.length) {
+    el.innerHTML = '<div class="empty-state"><p>Nog geen ideeen ingediend</p><small>Gebruik het formulier hierboven om een idee toe te voegen.</small></div>';
+    return;
+  }
+  el.innerHTML = ideas.map(i => {
+    const pct = Math.min(i.score / 11 * 100, 100);
+    return `<div class="idea-card p-${i.priority}">
+      <div class="idea-top">
+        <div class="idea-title">${esc(i.proces)}</div>
+        <span class="badge badge-${i.priority}">${prioLabel(i.priority)}</span>
+      </div>
+      <div class="idea-meta">
+        <span>${esc(i.team)}</span>
+        ${i.naam && i.naam!=='Anoniem' ? `<span>${esc(i.naam)}</span>`:''}
+        <span>${esc(i.freq)}</span>
+        <span>~${fmtTime(i.tijdMin)} per keer</span>
+      </div>
+      ${i.aard?.length ? `<div class="idea-tags">${i.aard.map(a=>`<span class="idea-tag">${esc(a)}</span>`).join('')}</div>`:''}
+      ${i.context ? `<div class="idea-notes">${esc(i.context)}</div>` : ''}
+      <div class="idea-footer">
+        <div class="idea-footer-left">
+          ${new Date(i.timestamp).toLocaleString('nl-NL')}
+          <span class="score-bar">
+            <span style="font-weight:600;font-size:0.73rem;color:${scoreColor(i.score)}">${i.score}/11</span>
+            <span class="score-track"><span class="score-fill" style="width:${pct}%;background:${scoreColor(i.score)}"></span></span>
+          </span>
+        </div>
+        <button class="btn-link" onclick="deleteIdee(${i.id})">Verwijderen</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = ideas.length;
+  document.getElementById('statHigh').textContent = ideas.filter(i => i.priority==='hoog').length;
+  document.getElementById('statMedium').textContent = ideas.filter(i => i.priority==='midden').length;
+  const m = { 'Dagelijks':5,'Wekelijks':1,'Maandelijks':0.25,'Per kwartaal':0.08,'Ad hoc':0.5 };
+  const hrs = Math.round(ideas.reduce((s,i) => s + i.tijdMin * (m[i.freq]||1), 0) / 60);
+  document.getElementById('statSavings').textContent = hrs + ' uur';
+}
+
+function updateTeamFilter() {
+  const sel = document.getElementById('filterTeam');
+  const cur = sel.value;
+  const teams = [...new Set(ideas.map(i=>i.team))].sort();
+  sel.innerHTML = '<option value="">Alle teams</option>' + teams.map(t => `<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  if (teams.includes(cur)) sel.value = cur;
+  document.getElementById('team-list').innerHTML = teams.map(t => `<option value="${esc(t)}">`).join('');
+}
+
+function downloadCSV() {
+  if (!ideas.length) { showToast('Geen gegevens om te exporteren.', true); return; }
+  window.open(API + '/ideeen/export/csv', '_blank');
+}
+
+function exportClaude() {
+  if (!ideas.length) { showToast('Geen gegevens om te exporteren.', true); return; }
+  const m = { 'Dagelijks':5,'Wekelijks':1,'Maandelijks':0.25,'Per kwartaal':0.08,'Ad hoc':0.5 };
+  const hrs = Math.round(ideas.reduce((s,i) => s + i.tijdMin * (m[i.freq]||1), 0) / 60);
+
+  let t = `OPHAALSESSIE AI-AUTOMATISERING - OVERZICHT\n`;
+  t += `${'='.repeat(50)}\n`;
+  t += `Datum: ${new Date().toLocaleDateString('nl-NL')}\n`;
+  t += `Totaal ingediend: ${ideas.length}\n`;
+  t += `Hoge prioriteit: ${ideas.filter(i=>i.priority==='hoog').length}\n`;
+  t += `Middelhoge prioriteit: ${ideas.filter(i=>i.priority==='midden').length}\n`;
+  t += `Lage prioriteit: ${ideas.filter(i=>i.priority==='laag').length}\n`;
+  t += `Geschatte besparing: ~${hrs} uur per week\n`;
+  t += `${'='.repeat(50)}\n\n`;
+
+  ideas.forEach((i, idx) => {
+    t += `${idx+1}. [${prioLabel(i.priority)}] ${i.proces}\n`;
+    t += `   Afdeling: ${i.team} | Naam: ${i.naam}\n`;
+    t += `   Frequentie: ${i.freq} | Besparing: ~${fmtTime(i.tijdMin)} per keer | Score: ${i.score}/11\n`;
+    if (i.aard?.length) t += `   Soort werk: ${i.aard.join(', ')}\n`;
+    if (i.context) t += `   Toelichting: ${i.context}\n`;
+    t += `\n`;
+  });
+
+  t += `${'='.repeat(50)}\n`;
+  t += `Opdracht:\n`;
+  t += `1. Groepeer de ideeen per type automatisering\n`;
+  t += `2. Geef per groep een inschatting van de complexiteit (laag / middel / hoog)\n`;
+  t += `3. Stel een top 3 voor met de meeste impact en minste moeite\n`;
+  t += `4. Benoem overlappingen of synergie tussen ideeen\n`;
+
+  document.getElementById('exportContent').textContent = t;
+  document.getElementById('exportModal').classList.add('active');
+}
+
+function copyExport() {
+  navigator.clipboard.writeText(document.getElementById('exportContent').textContent).then(() => showToast('Gekopieerd naar klembord.'));
+}
+
+function closeModal() { document.getElementById('exportModal').classList.remove('active'); }
+document.getElementById('exportModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeModal(); });
+
+function showToast(msg, err) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (err?'error':'success') + ' show';
+  setTimeout(() => t.className = 'toast', 2800);
+}
+
+function esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+function fmtTime(m) { return m>=60?(m/60)+' uur':m+' min'; }
+
+loadIdeas();
+setInterval(loadIdeas, 30000);
+</script>
+
+</body>
+</html>
