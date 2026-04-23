@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Sprint - Ophaalsessie</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #0f0f1a;
+  --surface: #1a1a2e;
+  --surface-2: #222240;
+  --border: rgba(255,255,255,0.06);
+  --text: #e8e8f0;
+  --muted: #8888a8;
+  --accent: #7c5cfc;
+  --accent-glow: rgba(124,92,252,0.25);
+  --accent-2: #00d4aa;
+  --accent-2-glow: rgba(0,212,170,0.2);
+  --warning: #ffb347;
+  --danger: #ff5c6c;
+  --high: #ff5c6c;
+  --medium: #ffb347;
+  --low: #00d4aa;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Animated background blobs */
+.bg-blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+}
+.bg-blob-1 { width:600px; height:600px; background:#7c5cfc; top:-200px; right:-100px; animation: blobFloat 20s ease-in-out infinite; }
+.bg-blob-2 { width:500px; height:500px; background:#00d4aa; bottom:-150px; left:-100px; animation: blobFloat 25s ease-in-out infinite reverse; }
+.bg-blob-3 { width:400px; height:400px; background:#ff5c6c; top:40%; left:30%; animation: blobFloat 18s ease-in-out infinite 5s; }
+
+@keyframes blobFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.05); }
+  66% { transform: translate(-20px, 30px) scale(0.95); }
+}
+
+.container { max-width:1120px; margin:0 auto; padding:24px 16px; position:relative; z-index:1; }
+
+/* Header */
+header {
+  text-align: center;
+  margin-bottom: 36px;
+  padding: 48px 24px;
+  position: relative;
+}
+
+header h1 {
+  font-size: 2.4rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #7c5cfc 0%, #00d4aa 50%, #ffb347 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+header p {
+  color: var(--muted);
+  font-size: 1.1rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* Stats bar */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 700px) { .stats-bar { grid-template-columns: repeat(2, 1fr); } }
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.stat-card:nth-child(1)::before { background: linear-gradient(90deg, #7c5cfc, transparent); }
+.stat-card:nth-child(2)::before { background: linear-gradient(90deg, #ff5c6c, transparent); }
+.stat-card:nth-child(3)::before { background: linear-gradient(90deg, #ffb347, transparent); }
+.stat-card:nth-child(4)::before { background: linear-gradient(90deg, #00d4aa, transparent); }
+
+.stat-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.1); }
+
+.stat-number {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.stat-number.total { color: #7c5cfc; }
+.stat-number.high { color: #ff5c6c; }
+.stat-number.medium { color: #ffb347; }
+.stat-number.savings { color: #00d4aa; }
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 24px;
+  transition: border-color 0.2s;
+}
+
+.card:hover { border-color: rgba(255,255,255,0.08); }
+
+.card h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card h2 .icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+/* Form */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
+
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group.full { grid-column: 1 / -1; }
+
+label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+input, textarea {
+  padding: 12px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: var(--surface-2);
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  background: rgba(34,34,64,0.8);
+}
+
+input::placeholder, textarea::placeholder { color: rgba(136,136,168,0.5); }
+
+textarea { resize: vertical; min-height: 70px; }
+
+/* Tags */
+.tag-group { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.tag {
+  padding: 8px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 24px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--surface-2);
+  color: var(--muted);
+  user-select: none;
+}
+
+.tag:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: rgba(124,92,252,0.08);
+}
+
+.tag.selected {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+
+/* Buttons */
+.btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #7c5cfc 0%, #6a4de8 100%);
+  color: white;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 24px var(--accent-glow); }
+.btn-primary:disabled { opacity:0.5; transform:none; cursor:not-allowed; }
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--muted);
+}
+.btn-outline:hover { border-color: var(--accent); color: var(--text); }
+
+.btn-success {
+  background: linear-gradient(135deg, #00d4aa, #00b894);
+  color: #0f0f1a;
+  font-weight: 700;
+}
+.btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 16px var(--accent-2-glow); }
+
+.btn-danger {
+  background: rgba(255,92,108,0.1);
+  color: var(--danger);
+  border: 1px solid rgba(255,92,108,0.2);
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border-radius: 8px;
+}
+.btn-danger:hover { background: rgba(255,92,108,0.2); }
+
+.form-actions { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; }
+
+/* Overview header */
+.overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.overview-header h2 { font-size: 1.15rem; font-weight: 700; }
+
+.overview-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+.filter-select {
+  padding: 8px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.filter-select:focus { outline:none; border-color:var(--accent); }
+
+/* Idea cards */
+.idea-list { display: flex; flex-direction: column; gap: 12px; }
+
+.idea-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px 26px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.15s, box-shadow 0.15s;
+  animation: cardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cardIn {
+  from { opacity:0; transform: translateY(12px) scale(0.98); }
+  to { opacity:1; transform: translateY(0) scale(1); }
+}
+
+.idea-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+
+.idea-card.priority-hoog::before { background: linear-gradient(180deg, #ff5c6c, #ff8a80); box-shadow: 0 0 12px rgba(255,92,108,0.3); }
+.idea-card.priority-midden::before { background: linear-gradient(180deg, #ffb347, #ffd180); }
+.idea-card.priority-laag::before { background: linear-gradient(180deg, #00d4aa, #69f0ae); }
+
+.idea-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  border-color: rgba(255,255,255,0.08);
+}
+
+.idea-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+.idea-title { font-weight: 700; font-size: 1.05rem; }
+
+.priority-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.priority-badge.hoog { background: rgba(255,92,108,0.12); color: #ff5c6c; }
+.priority-badge.midden { background: rgba(255,179,71,0.12); color: #ffb347; }
+.priority-badge.laag { background: rgba(0,212,170,0.12); color: #00d4aa; }
+
+.idea-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.84rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.idea-meta span { display: inline-flex; align-items: center; gap: 5px; }
+
+.idea-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+
+.idea-tag {
+  padding: 3px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  background: rgba(124,92,252,0.1);
+  color: #9b85fc;
+  border: 1px solid rgba(124,92,252,0.15);
+}
+
+.idea-notes {
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-style: italic;
+  line-height: 1.5;
+  padding-left: 12px;
+  border-left: 2px solid var(--border);
+}
+
+.idea-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.idea-footer-left { font-size: 0.78rem; color: rgba(136,136,168,0.6); }
+
+.empty-state {
+  text-align: center;
+  padding: 64px 20px;
+  color: var(--muted);
+}
+
+.empty-state .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.3; }
+.empty-state p { font-size: 1.15rem; margin-bottom: 6px; }
+.empty-state small { font-size: 0.9rem; opacity: 0.6; }
+
+/* Progress bar for score */
+.score-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.score-track {
+  width: 60px;
+  height: 4px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.score-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 14px 24px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transform: translateY(100px);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1000;
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
+
+.toast.success { background: rgba(0,212,170,0.15); color: #00d4aa; border-color: rgba(0,212,170,0.2); }
+.toast.error { background: rgba(255,92,108,0.15); color: #ff5c6c; border-color: rgba(255,92,108,0.2); }
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 900;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.modal-overlay.active { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal h3 { margin-bottom: 16px; font-size: 1.2rem; }
+
+.modal pre {
+  background: #0a0a1a;
+  color: #c8c8e0;
+  padding: 20px;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+}
+
+.modal-actions { margin-top: 20px; display: flex; gap: 10px; }
+
+/* Keyboard hint */
+.kbd-hint {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: rgba(136,136,168,0.4);
+}
+
+.kbd {
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.75rem;
+  background: var(--surface-2);
+}
+
+/* Confetti burst */
+@keyframes confettiBurst {
+  0% { transform: scale(0); opacity: 1; }
+  50% { opacity: 1; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.confetti-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+  height: 100px;
+  margin: -50px 0 0 -50px;
+  border: 3px solid var(--accent);
+  border-radius: 50%;
+  animation: confettiBurst 0.6s ease-out forwards;
+  pointer-events: none;
+}
+
+/* Dark scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="bg-blob bg-blob-1"></div>
+<div class="bg-blob bg-blob-2"></div>
+<div class="bg-blob bg-blob-3"></div>
+
+<div class="container">
+  <header>
+    <h1>AI Sprint</h1>
+    <p>Welk proces kost jou tijd? Deel je idee en help bepalen waar AI het meeste impact maakt.</p>
+  </header>
+
+  <!-- Live stats -->
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-number total" id="statTotal">-</div>
+      <div class="stat-label">Ingediende ideeen</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number high" id="statHigh">-</div>
+      <div class="stat-label">Quick wins</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number medium" id="statMedium">-</div>
+      <div class="stat-label">Potentieel</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number savings" id="statSavings">-</div>
+      <div class="stat-label">Besparing / week</div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="card" id="formCard">
+    <h2>
+      <span class="icon" style="background:var(--accent-glow); color:var(--accent);">&#9997;</span>
+      Wat kost jou tijd?
+    </h2>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="team">Team</label>
+        <input type="text" id="team" placeholder="bijv. HR, Finance, IT" list="team-list" required>
+        <datalist id="team-list"></datalist>
+      </div>
+      <div class="form-group">
+        <label for="naam">Jouw naam</label>
+        <input type="text" id="naam" placeholder="Wie ben je?">
+      </div>
+      <div class="form-group full">
+        <label for="proces">Welk proces neemt te veel tijd in beslag?</label>
+        <input type="text" id="proces" placeholder="bijv. Handmatig facturen controleren en goedkeuren">
+      </div>
+
+      <div class="form-group">
+        <label>Hoe vaak doe je dit?</label>
+        <div class="tag-group" id="freq-tags">
+          <span class="tag" data-value="Dagelijks">Dagelijks</span>
+          <span class="tag" data-value="Wekelijks">Wekelijks</span>
+          <span class="tag" data-value="Maandelijks">Maandelijks</span>
+          <span class="tag" data-value="Per kwartaal">Per kwartaal</span>
+          <span class="tag" data-value="Ad hoc">Ad hoc</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Wat voor werk is het?</label>
+        <div class="tag-group" id="aard-tags">
+          <span class="tag" data-value="Copy-paste">Copy-paste</span>
+          <span class="tag" data-value="Data-invoer">Data-invoer</span>
+          <span class="tag" data-value="E-mails">E-mails</span>
+          <span class="tag" data-value="Rapportages">Rapportages</span>
+          <span class="tag" data-value="Goedkeuringen">Goedkeuringen</span>
+          <span class="tag" data-value="Zoeken/vergelijken">Zoeken/vergelijken</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Hoeveel tijd bespaar je per keer?</label>
+        <div class="tag-group" id="tijd-tags">
+          <span class="tag" data-value="15">15 min</span>
+          <span class="tag" data-value="30">30 min</span>
+          <span class="tag" data-value="60">1 uur</span>
+          <span class="tag" data-value="120">2 uur</span>
+          <span class="tag" data-value="240">4 uur+</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Hoe voorspelbaar is het proces?</label>
+        <div class="tag-group" id="repetitief-tags">
+          <span class="tag" data-value="1">Altijd hetzelfde</span>
+          <span class="tag" data-value="2">Meestal vergelijkbaar</span>
+          <span class="tag" data-value="3">Elke keer anders</span>
+        </div>
+      </div>
+
+      <div class="form-group full">
+        <label for="context">Extra context (optioneel)</label>
+        <textarea id="context" placeholder="Welke tools gebruik je? Wat gaat er vaak mis? Nog iets dat handig is om te weten..."></textarea>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" id="submitBtn" onclick="submitIdee()">&#9889; Insturen</button>
+      <button class="btn btn-outline" onclick="resetForm()">Wissen</button>
+    </div>
+
+    <div class="kbd-hint">
+      <kbd class="kbd">Ctrl</kbd> + <kbd class="kbd">Enter</kbd> om snel in te sturen
+    </div>
+  </div>
+
+  <!-- Overview -->
+  <div class="overview-header">
+    <h2>Alle ingediende ideeen</h2>
+    <div class="overview-actions">
+      <select class="filter-select" id="filterTeam" onchange="loadIdeas()">
+        <option value="">Alle teams</option>
+      </select>
+      <select class="filter-select" id="filterPriority" onchange="loadIdeas()">
+        <option value="">Alles</option>
+        <option value="hoog">Quick wins</option>
+        <option value="midden">Potentieel</option>
+        <option value="laag">Lange termijn</option>
+      </select>
+      <button class="btn btn-outline" onclick="downloadCSV()">CSV</button>
+      <button class="btn btn-success" onclick="exportClaude()">&#129302; Claude export</button>
+    </div>
+  </div>
+
+  <div class="idea-list" id="ideaList">
+    <div class="loading" style="text-align:center; padding:40px; color:var(--muted);">Ideeen laden...</div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Export modal -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <h3>&#129302; Claude Analyse</h3>
+    <p style="margin-bottom:14px; color:var(--muted); font-size:0.9rem;">Kopieer en plak in Claude voor een analyse met prioritering en actieplan.</p>
+    <pre id="exportContent"></pre>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="copyExport()">&#128203; Kopieer</button>
+      <button class="btn btn-outline" onclick="closeModal()">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/ophaal-api/api';
+
+let ideas = [];
+let selectedTags = { freq: null, aard: [], tijd: null, repetitief: null };
+let submitting = false;
+
+// --- Keyboard shortcut ---
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !submitting) {
+    e.preventDefault();
+    submitIdee();
+  }
+});
+
+// --- Tag clicking ---
+function setupTags(containerId, key, multi) {
+  document.querySelectorAll(`#${containerId} .tag`).forEach(tag => {
+    tag.addEventListener('click', () => {
+      if (multi) {
+        tag.classList.toggle('selected');
+        const val = tag.dataset.value;
+        if (selectedTags[key].includes(val)) {
+          selectedTags[key] = selectedTags[key].filter(v => v !== val);
+        } else {
+          selectedTags[key].push(val);
+        }
+      } else {
+        document.querySelectorAll(`#${containerId} .tag`).forEach(t => t.classList.remove('selected'));
+        tag.classList.add('selected');
+        selectedTags[key] = tag.dataset.value;
+      }
+    });
+  });
+}
+
+setupTags('freq-tags', 'freq', false);
+setupTags('aard-tags', 'aard', true);
+setupTags('tijd-tags', 'tijd', false);
+setupTags('repetitief-tags', 'repetitief', false);
+
+// --- Priority ---
+function getPriority(score) {
+  if (score >= 8) return 'hoog';
+  if (score >= 4) return 'midden';
+  return 'laag';
+}
+
+function priorityLabel(p) {
+  return { hoog: 'Quick win', midden: 'Potentieel', laag: 'Lange termijn' }[p] || p;
+}
+
+function calcScore(freq, tijdMin, repetitief) {
+  const freqScore = { 'Dagelijks': 5, 'Wekelijks': 4, 'Maandelijks': 3, 'Per kwartaal': 2, 'Ad hoc': 1 };
+  const repScore = { '1': 3, '2': 2, '3': 1 };
+  const tijdScore = tijdMin >= 120 ? 3 : tijdMin >= 60 ? 2 : 1;
+  return (freqScore[freq] || 1) + (repScore[repetitief] || 1) + tijdScore;
+}
+
+function scoreColor(score) {
+  if (score >= 8) return '#ff5c6c';
+  if (score >= 4) return '#ffb347';
+  return '#00d4aa';
+}
+
+// --- API ---
+async function apiPost(idee) {
+  const res = await fetch(`${API}/ideeen`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(idee)
+  });
+  if (!res.ok) throw new Error('Opslaan mislukt');
+  return res.json();
+}
+
+async function apiGet(params = '') {
+  const res = await fetch(`${API}/ideeen${params}`);
+  if (!res.ok) throw new Error('Laden mislukt');
+  return res.json();
+}
+
+async function apiDelete(id) {
+  const res = await fetch(`${API}/ideeen/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Verwijderen mislukt');
+}
+
+// --- Submit ---
+async function submitIdee() {
+  if (submitting) return;
+  const team = document.getElementById('team').value.trim();
+  const naam = document.getElementById('naam').value.trim();
+  const proces = document.getElementById('proces').value.trim();
+  const context = document.getElementById('context').value.trim();
+
+  if (!team || !proces) { showToast('Vul minstens je team en proces in', true); return; }
+  if (!selectedTags.freq) { showToast('Kies hoe vaak je dit doet', true); return; }
+  if (!selectedTags.tijd) { showToast('Kies hoeveel tijd het kost', true); return; }
+  if (!selectedTags.repetitief) { showToast('Kies hoe voorspelbaar het is', true); return; }
+
+  const tijdMin = parseInt(selectedTags.tijd);
+  const score = calcScore(selectedTags.freq, tijdMin, selectedTags.repetitief);
+  const priority = getPriority(score);
+
+  const idee = {
+    team, naam: naam || 'Anoniem', proces,
+    freq: selectedTags.freq,
+    aard: [...selectedTags.aard],
+    tijdMin,
+    repetitief: selectedTags.repetitief,
+    score, priority, context
+  };
+
+  submitting = true;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="display:inline-block;animation:spin 0.6s linear infinite;">&#9696;</span> Opslaan...';
+
+  try {
+    await apiPost(idee);
+    resetForm();
+    await loadIdeas();
+    showToast(priority === 'hoog' ? 'Quick win toegevoegd!' : 'Idee opgeslagen!');
+  } catch (e) {
+    showToast('Er ging iets mis: ' + e.message, true);
+  } finally {
+    submitting = false;
+    btn.disabled = false;
+    btn.innerHTML = '&#9889; Insturen';
+  }
+}
+
+function resetForm() {
+  document.getElementById('team').value = '';
+  document.getElementById('naam').value = '';
+  document.getElementById('proces').value = '';
+  document.getElementById('context').value = '';
+  selectedTags = { freq: null, aard: [], tijd: null, repetitief: null };
+  document.querySelectorAll('.tag.selected').forEach(t => t.classList.remove('selected'));
+  document.getElementById('team').focus();
+}
+
+// --- Load & render ---
+async function loadIdeas() {
+  const team = document.getElementById('filterTeam').value;
+  const prio = document.getElementById('filterPriority').value;
+  let params = '?';
+  if (team) params += `team=${encodeURIComponent(team)}&`;
+  if (prio) params += `priority=${prio}&`;
+
+  try {
+    ideas = await apiGet(params);
+  } catch (e) {
+    document.getElementById('ideaList').innerHTML = `<div class="empty-state"><p>Kan ideeen niet laden</p><small>${e.message}</small></div>`;
+    return;
+  }
+
+  updateTeamFilter();
+  renderIdeas();
+  updateStats();
+}
+
+async function deleteIdee(id) {
+  if (!confirm('Weet je zeker dat je dit idee wilt verwijderen?')) return;
+  try {
+    await apiDelete(id);
+    await loadIdeas();
+    showToast('Verwijderd');
+  } catch (e) {
+    showToast('Verwijderen mislukt', true);
+  }
+}
+
+function renderIdeas() {
+  const list = document.getElementById('ideaList');
+
+  if (ideas.length === 0) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">&#128161;</div>
+      <p>Nog geen ideeen</p>
+      <small>Jij kunt de eerste zijn</small>
+    </div>`;
+    return;
+  }
+
+  list.innerHTML = ideas.map(i => {
+    const pct = Math.min((i.score / 11) * 100, 100);
+    return `
+    <div class="idea-card priority-${i.priority}">
+      <div class="idea-top">
+        <div class="idea-title">${escHtml(i.proces)}</div>
+        <span class="priority-badge ${i.priority}">${priorityLabel(i.priority)}</span>
+      </div>
+      <div class="idea-meta">
+        <span>&#128101; ${escHtml(i.team)}</span>
+        ${i.naam ? `<span>&#128100; ${escHtml(i.naam)}</span>` : ''}
+        <span>&#128197; ${escHtml(i.freq)}</span>
+        <span>&#9201; ~${formatTime(i.tijdMin)}</span>
+      </div>
+      ${i.aard && i.aard.length ? `<div class="idea-tags">${i.aard.map(a => `<span class="idea-tag">${escHtml(a)}</span>`).join('')}</div>` : ''}
+      ${i.context ? `<div class="idea-notes">${escHtml(i.context)}</div>` : ''}
+      <div class="idea-footer">
+        <div class="idea-footer-left">
+          ${new Date(i.timestamp).toLocaleString('nl-NL')}
+          <span class="score-bar" style="margin-left:12px;">
+            <span style="color:${scoreColor(i.score)}; font-weight:700; font-size:0.8rem;">${i.score}</span>
+            <span class="score-track"><span class="score-fill" style="width:${pct}%; background:${scoreColor(i.score)};"></span></span>
+          </span>
+        </div>
+        <button class="btn btn-danger" onclick="deleteIdee(${i.id})">&#10005;</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats() {
+  document.getElementById('statTotal').textContent = ideas.length;
+  document.getElementById('statHigh').textContent = ideas.filter(i => i.priority === 'hoog').length;
+  document.getElementById('statMedium').textContent = ideas.filter(i => i.priority === 'midden').length;
+
+  const totalMin = ideas.reduce((sum, i) => {
+    const m = { 'Dagelijks': 5, 'Wekelijks': 1, 'Maandelijks': 0.25, 'Per kwartaal': 0.08, 'Ad hoc': 0.5 };
+    return sum + i.tijdMin * (m[i.freq] || 1);
+  }, 0);
+
+  document.getElementById('statSavings').textContent = Math.round(totalMin / 60) + 'u';
+}
+
+function updateTeamFilter() {
+  const select = document.getElementById('filterTeam');
+  const current = select.value;
+  const teams = [...new Set(ideas.map(i => i.team))].sort();
+  select.innerHTML = '<option value="">Alle teams</option>' + teams.map(t => `<option value="${escHtml(t)}">${escHtml(t)}</option>`).join('');
+  if (teams.includes(current)) select.value = current;
+
+  const dl = document.getElementById('team-list');
+  dl.innerHTML = teams.map(t => `<option value="${escHtml(t)}">`).join('');
+}
+
+// --- Export ---
+function downloadCSV() {
+  if (ideas.length === 0) { showToast('Nog geen ideeen', true); return; }
+  window.open(`${API}/ideeen/export/csv`, '_blank');
+}
+
+function exportClaude() {
+  if (ideas.length === 0) { showToast('Nog geen ideeen', true); return; }
+
+  const totalSavings = Math.round(ideas.reduce((sum, i) => {
+    const m = { 'Dagelijks': 5, 'Wekelijks': 1, 'Maandelijks': 0.25, 'Per kwartaal': 0.08, 'Ad hoc': 0.5 };
+    return sum + i.tijdMin * (m[i.freq] || 1);
+  }, 0) / 60);
+
+  let text = `OPHAALSESSIE AI AUTOMATISERING\n`;
+  text += `${'='.repeat(50)}\n`;
+  text += `Datum: ${new Date().toLocaleDateString('nl-NL')}\n`;
+  text += `Totaal: ${ideas.length} ideeen | Quick wins: ${ideas.filter(i=>i.priority==='hoog').length} | Besparing: ~${totalSavings}u/week\n`;
+  text += `${'='.repeat(50)}\n\n`;
+
+  ideas.forEach((i, idx) => {
+    text += `${idx+1}. [${priorityLabel(i.priority).toUpperCase()}] ${i.proces}\n`;
+    text += `   Team: ${i.team} | Door: ${i.naam}\n`;
+    text += `   Frequentie: ${i.freq} | Besparing: ~${formatTime(i.tijdMin)} | Score: ${i.score}/11\n`;
+    if (i.aard?.length) text += `   Type: ${i.aard.join(', ')}\n`;
+    if (i.context) text += `   Context: ${i.context}\n`;
+    text += `\n`;
+  });
+
+  text += `${'='.repeat(50)}\n`;
+  text += `Opdracht voor Claude:\n`;
+  text += `1. Groepeer ideeen per automatiseringstype\n`;
+  text += `2. Geef per groep een complexiteit-inschatting\n`;
+  text += `3. Stel een top 3 quick wins voor\n`;
+  text += `4. Identificeer synergie en overlappingen\n`;
+
+  document.getElementById('exportContent').textContent = text;
+  document.getElementById('exportModal').classList.add('active');
+}
+
+function copyExport() {
+  navigator.clipboard.writeText(document.getElementById('exportContent').textContent).then(() => showToast('Gekopieerd!'));
+}
+
+function closeModal() { document.getElementById('exportModal').classList.remove('active'); }
+document.getElementById('exportModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+// --- Utils ---
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + (isError ? 'error' : 'success') + ' show';
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+function escHtml(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+function formatTime(m) { return m >= 60 ? (m/60) + ' uur' : m + ' min'; }
+
+// --- Spinner animation ---
+const style = document.createElement('style');
+style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+document.head.appendChild(style);
+
+// --- Init ---
+loadIdeas();
+setInterval(loadIdeas, 30000);
+</script>
+
+</body>
+</html>
